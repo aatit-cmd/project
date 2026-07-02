@@ -8,12 +8,15 @@
   "main": "server.js",
   "scripts": {
     "start": "node ./dist/server.js",
+    "dev": "ts-node-dev ./src/server.ts",
     "build": "tsc"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.7.3"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6"
+    "@types/express": "^5.0.6",
+    "ts-node-dev": "^2.0.0"
   }
 }
