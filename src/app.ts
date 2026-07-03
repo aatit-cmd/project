@@ -3,13 +3,13 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 // @types/packageName 
 // this is dev dependency package which is used to provide type definitions for the express package. It allows TypeScript to understand the types and interfaces of the express library, enabling better type checking and autocompletion in your code editor.
 
+import authRoutes from "./routes/auth.routes"
 //* creating app instance
 const app = express();
 
 //! using middlewares
 app.use(express.json({limit: "10mb"}));
 
-//! using routes
 
 //* health route
 app.get("/",(req:Request, res: Response, next: NextFunction) => {
@@ -21,7 +21,10 @@ app.get("/",(req:Request, res: Response, next: NextFunction) => {
     })
 })
 
-//! pathnot found
+//! using routes
+app.use("/api/v1/auth",authRoutes);
+
+//! path not found
 app.use((req:Request,res:Response,next:NextFunction)=>{
     const message = `can not ${req.method} on ${req.path}`;
     
@@ -33,8 +36,8 @@ app.use((req:Request,res:Response,next:NextFunction)=>{
     // })
 
     const error: any = new Error(message);
-    error.status = "fail",
-    error.statusCode = 404,
+    error.status = "fail"
+    error.statusCode = 404
     next(error)
 })
 

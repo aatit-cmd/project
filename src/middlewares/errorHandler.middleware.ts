@@ -1,11 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 
-export const errorHandler = (error:any, req : Request, res: Response, next : NextFunction)=>{
+
+export const errorHandler = (error: any, req : Request, res: Response, next : NextFunction)=>{
     console.log(error);
     const message = error?.message ??"Internal server error";
-    const status = error?.status ?? "error";
-    const statusCode = error?.statusCode ?? 500;
+    let status = error?.status ?? "error";
+    let statusCode = error?.statusCode ?? 500;
     const success = false;
+
+    if (error?.cause?.code === 11000){
+        statusCode = 400;
+        status = "fail";
+    }
 
     res.status(statusCode).json({
         message,
