@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, request } from 'express';
 import User from '../models/user.model';
-import { hashPassword } from '../utils/bcrypt.utils';
+import { comparePassword, hashPassword } from '../utils/bcrypt.utils';
 import appError from '../utils/appError.utils';
 
 //* register
@@ -61,7 +61,52 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 }
 
 //* login
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+        // email, password
+        const {email, password} = request.body;
+        if(!email){
+            throw new appError("email is required",400);
+        }
+        if(!email){
+            throw new appError("email is required",400);
 
+        }
+         if(!password){
+            throw new appError("password is required",400)
+        }
+
+
+        // find user by email
+        const user = await User.findOne({email : email});
+        
+        if(!user){
+            throw new appError("credentials not matched",400)
+        }
+
+        // compare password
+        const isPassMatched = await comparePassword(password, user.password)
+
+        if(!isPassMatched){
+            throw new appError("credentials not matched",400)
+        }
+
+
+        // todo: generate jwt token
+
+
+        //* send success response
+        res.status(201).json({
+            message:"Login sucess",
+            status : "success",
+            success : true,
+            data : user
+        })
+    }
+    catch (error){
+
+    }
+}
 //* get profile
 
 //* change password
