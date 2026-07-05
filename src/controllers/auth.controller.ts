@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, request } from 'express';
+import { Request, Response, NextFunction} from 'express';
 import User from '../models/user.model';
 import { comparePassword, hashPassword } from '../utils/bcrypt.utils';
 import appError from '../utils/appError.utils';
@@ -64,13 +64,9 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     try{
         // email, password
-        const {email, password} = request.body;
+        const {email, password} = req.body;
         if(!email){
             throw new appError("email is required",400);
-        }
-        if(!email){
-            throw new appError("email is required",400);
-
         }
          if(!password){
             throw new appError("password is required",400)
@@ -104,6 +100,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         })
     }
     catch (error){
+        next(error);
 
     }
 }
