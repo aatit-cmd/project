@@ -74,7 +74,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 
         // find user by email
-        const user = await User.findOne({email : email});
+        const user = await User.findOne({email : email}).select("+password");
         
         if(!user){
             throw new appError("credentials not matched",400)
@@ -104,6 +104,47 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     }
 }
+
+// get all
+export const getAll = async (req: Request, res: Response, next: NextFunction) =>{
+    try{
+        const users = await User.find();
+
+        res.status(200).json({
+            message:"All users fetched",
+            status : "success",
+            success : true,
+            data : users
+
+        })
+    }
+    catch (error){
+        next (error)
+    }
+}
+
+// get byid
+export const getById = async (req: Request, res: Response, next: NextFunction) =>{
+    try{
+        const {id} = req.params;
+        const user = await User.findById({_id : id});
+
+        if (!user){
+            throw new appError("user by id not matched",404)
+        }
+        res.status(200).json({
+            message:"user fetched",
+            status : "success",
+            success : true,
+            data : user
+
+        })
+    }
+    catch(error){
+        next(error)
+    }
+}
+
 //* get profile
 
 //* change password
