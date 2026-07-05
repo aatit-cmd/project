@@ -4,6 +4,7 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 // this is dev dependency package which is used to provide type definitions for the express package. It allows TypeScript to understand the types and interfaces of the express library, enabling better type checking and autocompletion in your code editor.
 
 import routes from "./routes"
+
 //* creating app instance
 const app = express();
 
