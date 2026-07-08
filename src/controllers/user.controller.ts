@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction} from 'express';
 import User from '../models/user.model';
 import appError from '../utils/appError.utils';
+import { Role } from '../types/enum.types';
+
 
 // get all
 
 export const getAll = async (req: Request, res: Response, next: NextFunction) =>{
     try{
-        const users = await User.find();
+        const users = await User.find({role : Role.USER});
 
         res.status(200).json({
             message:"All users fetched",
@@ -26,7 +28,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 export const getAllAdmins = async (req: Request, res: Response, next: NextFunction) =>{
     try{
         const admins = await User.find({role: {
-            $in : ["ADMIN","SUPER ADMIN"]
+            $in : [Role.ADMIN,Role.SUPER_ADMIN]
         }});
 
         res.status(200).json({
