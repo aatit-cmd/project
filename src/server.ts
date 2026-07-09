@@ -1,6 +1,9 @@
+import "dotenv/config"
 import app from "./app";
 import { connectDatabase } from "./config/db.config";
 
+// dotenv.config()
+ 
 const PORT = process.env.PORT;
 const DBI_URI = process.env.DBI_URI ?? "";
 
