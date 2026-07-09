@@ -1,11 +1,12 @@
 import "dotenv/config"
 import app from "./app";
 import { connectDatabase } from "./config/db.config";
+import ENV_CONFIG from "./config/env.config";
 
 // dotenv.config()
  
-const PORT = process.env.PORT;
-const DBI_URI = process.env.DBI_URI ?? "";
+const PORT = ENV_CONFIG.PORT;
+const DBI_URI = ENV_CONFIG.DB_URI;
 
 //* connect database
 connectDatabase(DBI_URI);
