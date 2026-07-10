@@ -6,6 +6,8 @@ import { catchAsync } from "../utils/catchAsync.utils";
 import { upload } from "../utils/cloudinary.utils";
 import { IJwtPayload } from "../types/gloabal.types";
 import { generateJwtToken } from "../utils/jwt.utils";
+import ENV_CONFIG from "../config/env.config";
+import { sendResponse } from "../utils/sendResponse.utils";
 
 const uploadFolder = "/profile_images";
 
@@ -106,11 +108,24 @@ export const login = catchAsync(
 
     const access_token = generateJwtToken(payload);
 
+    res.cookie("access_token", access_token, {
+      httpOnly: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+      secure: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+      maxAge: 1000 * 60 * 60 * 24 * 7, //* 7 days
+      sameSite: ENV_CONFIG.NODE_ENV === "development" ? "lax" : "none",
+    });
+
     //* send success response
-    res.status(201).json({
+    // res.status(200).json({
+    //   message: "Login sucess",
+    //   status: "success",
+    //   success: true,
+    //   data: { user, access_token },
+    // });
+
+    sendResponse(res, {
       message: "Login sucess",
-      status: "success",
-      success: true,
+      statuscode: 201,
       data: { user, access_token },
     });
   },
