@@ -42,6 +42,8 @@ export const create = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, description } = req.body;
 
+    const file = req.file;
+
     if (!name) {
       throw new appError("Brand_name is required", 400);
     }

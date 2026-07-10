@@ -1,140 +1,149 @@
-import { Request, Response, NextFunction} from 'express';
-import User from '../models/user.model';
-import { comparePassword, hashPassword } from '../utils/bcrypt.utils';
-import appError from '../utils/appError.utils';
-import { catchAsync } from '../utils/catchAsync.utils';
+import { Request, Response, NextFunction } from "express";
+import User from "../models/user.model";
+import { comparePassword, hashPassword } from "../utils/bcrypt.utils";
+import appError from "../utils/appError.utils";
+import { catchAsync } from "../utils/catchAsync.utils";
+import { upload } from "../utils/cloudinary.utils";
+
+const uploadFolder = "/profile_images";
 
 //* register
 
 export const register = catchAsync(
-    async (req: Request, res: Response, next: NextFunction) => {
-    
-        const { full_name, email, password, phone } = req.body;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { full_name, email, password, phone } = req.body;
 
-        if(!full_name){
-            // const error :any = new Error("full_name is required");
-            // error.statusCode = 400;
-            // error.status = "fail";
-            // throw error;
+    const file = req.file;
 
-            throw new appError("full_name is required", 400)
-        }
-        if(!email){
-            // const error :any = new Error("email is required");
-            // error.statusCode = 400;
-            // error.status = "fail";
-            // throw error;
+    if (!full_name) {
+      // const error :any = new Error("full_name is required");
+      // error.statusCode = 400;
+      // error.status = "fail";
+      // throw error;
 
-            throw new appError("email is required",400);
-        }
-        if(!password){
-            // const error :any = new Error("password is required");
-            // error.statusCode = 400;
-            // error.status = "fail";
-            // throw error;
+      throw new appError("full_name is required", 400);
+    }
+    if (!email) {
+      // const error :any = new Error("email is required");
+      // error.statusCode = 400;
+      // error.status = "fail";
+      // throw error;
 
-            throw new appError("password is required",400)
-        }
+      throw new appError("email is required", 400);
+    }
+    if (!password) {
+      // const error :any = new Error("password is required");
+      // error.statusCode = 400;
+      // error.status = "fail";
+      // throw error;
 
-        const user = new User({email, password, full_name, phone});
+      throw new appError("password is required", 400);
+    }
 
-        // hash password
-        const hashPass  = await hashPassword(password);
-        user.password = hashPass;
+    const user = new User({ email, password, full_name, phone });
 
-        // handle profile image upload
+    // hash password
+    const hashPass = await hashPassword(password);
+    user.password = hashPass;
 
-        //! save user
-        await user.save();
+    // handle profile image upload
+    if (file) {
+      //* upload to cloudinary
+      const { path, public_id } = await upload(file, uploadFolder);
+      user.profile_image = {
+        path,
+        public_id,
+      };
+    }
 
+    //! save user
+    await user.save();
 
-        //* success response
-        res.status(201).json({
-            message:"Account created",
-            success : true,
-            status : "success",
-            data : user,
-        })
-
-})
+    //* success response
+    res.status(201).json({
+      message: "Account created",
+      success: true,
+      status: "success",
+      data: user,
+    });
+  },
+);
 
 //* login
 export const login = catchAsync(
-    async (req: Request, res: Response, next: NextFunction) => {
-        // email, password
-        const {email, password} = req.body;
-        if(!email){
-            throw new appError("email is required",400);
-        }
-         if(!password){
-            throw new appError("password is required",400)
-        }
+  async (req: Request, res: Response, next: NextFunction) => {
+    // email, password
+    const { email, password } = req.body;
+    if (!email) {
+      throw new appError("email is required", 400);
+    }
+    if (!password) {
+      throw new appError("password is required", 400);
+    }
 
+    // find user by email
+    const user = await User.findOne({ email: email }).select("+password");
 
-        // find user by email
-        const user = await User.findOne({email : email}).select("+password");
-        
-        if(!user){
-            throw new appError("credentials not matched",400)
-        }
+    if (!user) {
+      throw new appError("credentials not matched", 400);
+    }
 
-        // compare password
-        const isPassMatched = await comparePassword(password, user.password)
+    // compare password
+    const isPassMatched = await comparePassword(password, user.password);
 
-        if(!isPassMatched){
-            throw new appError("credentials not matched",400)
-        }
+    if (!isPassMatched) {
+      throw new appError("credentials not matched", 400);
+    }
 
+    // todo: generate jwt token
 
-        // todo: generate jwt token
-
-
-        //* send success response
-        res.status(201).json({
-            message:"Login sucess",
-            status : "success",
-            success : true,
-            data : user
-        })
-    
-})
+    //* send success response
+    res.status(201).json({
+      message: "Login sucess",
+      status: "success",
+      success: true,
+      data: user,
+    });
+  },
+);
 
 // get all
-export const getAll = async (req: Request, res: Response, next: NextFunction) =>{
-    try{
-        const users = await User.find();
+export const getAll = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const users = await User.find();
 
-        res.status(200).json({
-            message:"All users fetched",
-            status : "success",
-            success : true,
-            data : users
-
-        })
-    }
-    catch (error){
-        next (error)
-    }
-}
+    res.status(200).json({
+      message: "All users fetched",
+      status: "success",
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // get byid
 export const getById = catchAsync(
-    async (req: Request, res: Response, next: NextFunction) =>{
-    
-        const {id} = req.params;
-        const user = await User.findById({_id : id});
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const user = await User.findById({ _id: id });
 
-        if (!user){
-            throw new appError("user by id not matched",404)
-        }
-        res.status(200).json({
-            message:"user fetched",
-            status : "success",
-            success : true,
-            data : user
-
-        })
-})
+    if (!user) {
+      throw new appError("user by id not matched", 404);
+    }
+    res.status(200).json({
+      message: "user fetched",
+      status: "success",
+      success: true,
+      data: user,
+    });
+  },
+);
 
 //* get profile
 

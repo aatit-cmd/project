@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import {Role} from "../types/enum.types"
+import { Role } from "../types/enum.types";
+import ImageSchema from "./image.model";
 
 // user schema
 const userSchema = new mongoose.Schema(
@@ -19,15 +20,16 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "password is required"],
-      select : false
+      select: false,
     },
     profile_image: {
-      type: String,
+      type : ImageSchema, 
+      default: null,
     },
-    role:{
-        type: String,
-        enum : Object.values(Role),
-        default : Role.USER
+    role: {
+      type: String,
+      enum: Object.values(Role),
+      default: Role.USER,
     },
     phone: {
       type: String,
