@@ -4,6 +4,8 @@ import { comparePassword, hashPassword } from "../utils/bcrypt.utils";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { upload } from "../utils/cloudinary.utils";
+import { IJwtPayload } from "../types/gloabal.types";
+import { generateJwtToken } from "../utils/jwt.utils";
 
 const uploadFolder = "/profile_images";
 
@@ -95,14 +97,21 @@ export const login = catchAsync(
       throw new appError("credentials not matched", 400);
     }
 
-    // todo: generate jwt token
+    //todo: generate jwt token
+    const payload: IJwtPayload = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const access_token = generateJwtToken(payload);
 
     //* send success response
     res.status(201).json({
       message: "Login sucess",
       status: "success",
       success: true,
-      data: user,
+      data: { user, access_token },
     });
   },
 );
