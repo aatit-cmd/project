@@ -1,5 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
+import cookieParser from "cookie-parser";
+
 // @types/packageName 
 // this is dev dependency package which is used to provide type definitions for the express package. It allows TypeScript to understand the types and interfaces of the express library, enabling better type checking and autocompletion in your code editor.
 
@@ -10,6 +12,7 @@ const app = express();
 
 //! using middlewares
 app.use(express.json({limit: "10mb"}));
+app.use(cookieParser());
 
 
 //* health route

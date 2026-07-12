@@ -123,10 +123,11 @@ export const login = catchAsync(
     //   data: { user, access_token },
     // });
 
+    const { password: user_pass , ...rest } = user.toObject(); // remove password from response
     sendResponse(res, {
       message: "Login sucess",
       statuscode: 201,
-      data: { user, access_token },
+      data: { user: rest, access_token },
     });
   },
 );
@@ -140,12 +141,19 @@ export const getAll = async (
   try {
     const users = await User.find();
 
-    res.status(200).json({
-      message: "All users fetched",
-      status: "success",
-      success: true,
-      data: users,
-    });
+    // res.status(200).json({
+    //   message: "All users fetched",
+    //   status: "success",
+    //   success: true,
+    //   data: users,
+    // });
+
+    sendResponse(res,{
+      message : "All users fetched",
+      statuscode : 200,
+      data : users
+    })
+
   } catch (error) {
     next(error);
   }
@@ -160,14 +168,18 @@ export const getById = catchAsync(
     if (!user) {
       throw new appError("user by id not matched", 404);
     }
-    res.status(200).json({
-      message: "user fetched",
-      status: "success",
-      success: true,
-      data: user,
+    // res.status(200).json({
+    //   message: "user fetched",
+    //   status: "success",
+    //   success: true,
+    //   data: user,
+    sendResponse(res,{
+      message : "user fetched",
+      statuscode : 200,
+      data : user
+
+    })
     });
-  },
-);
 
 //* get profile
 

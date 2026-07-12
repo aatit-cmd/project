@@ -1,5 +1,6 @@
 import express from "express";
 import { create, getAll, getById, remove, update } from "../controllers/brand.controller";
+import { authenticate } from "../middlewares/auth.middlware";
 
 import { uploader } from "../middlewares/multer.middleware";
 const upload = uploader();
@@ -7,7 +8,7 @@ const upload = uploader();
 const router = express.Router();
 
 //getAll
-router.get("/",getAll);
+router.get("/",authenticate(),getAll);
 
 //getById
 router.get("/:id",getById);
