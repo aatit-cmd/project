@@ -3,7 +3,7 @@ import User from "../models/user.model";
 import { comparePassword, hashPassword } from "../utils/bcrypt.utils";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
-import { upload } from "../utils/cloudinary.utils";
+import { deleteFile, upload } from "../utils/cloudinary.utils";
 import { IJwtPayload } from "../types/gloabal.types";
 import { generateJwtToken } from "../utils/jwt.utils";
 import ENV_CONFIG from "../config/env.config";
@@ -123,7 +123,7 @@ export const login = catchAsync(
     //   data: { user, access_token },
     // });
 
-    const { password: user_pass , ...rest } = user.toObject(); // remove password from response
+    const { password: user_pass, ...rest } = user.toObject(); // remove password from response
     sendResponse(res, {
       message: "Login sucess",
       statuscode: 201,
@@ -148,12 +148,11 @@ export const getAll = async (
     //   data: users,
     // });
 
-    sendResponse(res,{
-      message : "All users fetched",
-      statuscode : 200,
-      data : users
-    })
-
+    sendResponse(res, {
+      message: "All users fetched",
+      statuscode: 200,
+      data: users,
+    });
   } catch (error) {
     next(error);
   }
@@ -173,16 +172,50 @@ export const getById = catchAsync(
     //   status: "success",
     //   success: true,
     //   data: user,
-    sendResponse(res,{
-      message : "user fetched",
-      statuscode : 200,
-      data : user
-
-    })
+    sendResponse(res, {
+      message: "user fetched",
+      statuscode: 200,
+      data: user,
     });
+  },
+);
+
+//* logout
 
 //* get profile
 
+//* change profile image
+export const changeProfileImage = catchAsync(
+  async (req: Request, res: Response) => {
+    const { _id } = req.user;
+    const file = req.file;
+    if (!file) {
+      throw new appError("profile_image is required", 400);
+    }
+    const user = await User.findOne({ _id: _id });
+    if (!user) {
+      throw new appError("Profile not found", 404);
+    }
+
+    //! delete old image
+    if (user.profile_image && user.profile_image?.public_id) {
+      await deleteFile(user.profile_image.public_id);
+    }
+
+    const { path, public_id } = await upload(file, uploadFolder);
+    user.profile_image = {
+      path,
+      public_id,
+    };
+
+    //* send success response
+    sendResponse(res, {
+      message: "Profile image updated",
+      statuscode: 200,
+      data: user,
+    });
+  },
+);
 //* change password
 
 //* forgot password

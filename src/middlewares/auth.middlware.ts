@@ -1,6 +1,5 @@
 import { Role } from "../types/enum.types";
 import { Request, Response, NextFunction } from "express";
-import cookieParser from "cookie-parser";
 import appError from "../utils/appError.utils";
 import { verifyJwtToken } from "../utils/jwt.utils";
 import { ENV_CONFIG } from "../config/env.config";
@@ -42,6 +41,12 @@ export const authenticate = (roles?: Role[]) => {
 
       if(roles && roles.length > 0 && !roles.includes(decoded_data.role)){
         throw new appError("Unauthorized .Access denied", 403);
+      }
+
+      req.user = {
+        _id : decoded_data._id,
+        email : decoded_data.email,
+        role : decoded_data.role
       }
       next();
     } catch (error) {

@@ -36,3 +36,15 @@ export const upload = async (file: Express.Multer.File, dir = "/") => {
     throw new appError("something went wrong", 500);
   }
 };
+
+//* delete image
+
+export const deleteFile = async (public_id: string) => {
+  try {
+    await cloudinary.uploader.destroy(public_id);
+    return true;
+  } catch (error) {
+    console.log(error);
+    throw new appError("something went wrong", 500);
+  }
+};
