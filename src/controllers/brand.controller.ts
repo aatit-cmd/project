@@ -3,7 +3,9 @@ import { Request, Response, NextFunction } from "express";
 import Brand from "../models/brand.model";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
+import { upload } from "../utils/cloudinary.utils";
 
+const uploadFolder = "/brand_logo"
 // getAll
 export const getAll = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -56,7 +58,16 @@ export const create = catchAsync(
       description,
     });
 
-    // Brand.save()
+    if (file) {
+      //* upload to cloudinary
+      const { path, public_id } = await upload(file, uploadFolder);
+      brand.logo = {
+        path,
+        public_id,
+      };
+    }
+
+     await brand.save()
 
     res.status(201).json({
       message: "brand created",

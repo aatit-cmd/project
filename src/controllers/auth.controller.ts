@@ -5,7 +5,7 @@ import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { deleteFile, upload } from "../utils/cloudinary.utils";
 import { IJwtPayload } from "../types/gloabal.types";
-import { generateJwtToken, verifyJwtToken } from "../utils/jwt.utils";
+import { generateJwtToken } from "../utils/jwt.utils";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utils";
 import { sendEmail } from "../utils/emailServer.utils";

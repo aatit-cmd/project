@@ -21,7 +21,7 @@ router.get("/", getAll);
 router.get("/:id", getById);
 
 //* create/post
-router.post("/",upload.single("logo"), authenticate(All_Admin),create);
+router.post("/",upload.single("logo"), authenticate(),create);
 
 //* update/put
 router.put("/:id",upload.single("logo"),authenticate(All_Admin) ,update);

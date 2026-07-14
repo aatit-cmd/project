@@ -2,13 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import Category from "../models/category.model";
 import { catchAsync } from "../utils/catchAsync.utils";
 import AppError from "../utils/appError.utils";
+import { upload } from "../utils/cloudinary.utils";
 
-
+const uploadFolder = "/category_logo";
 
 //* get all -> sapana
-
-
-
 
 export const getAll = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -46,6 +44,7 @@ export const getById = catchAsync(
 export const create = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, description } = req.body;
+    const file = req.file;
 
     if (!name) throw new AppError("name is required", 404);
     if (!description) throw new AppError("description is required", 404);
@@ -56,6 +55,16 @@ export const create = catchAsync(
     }
 
     const category = new Category({ name, description });
+
+    if (file) {
+      //* upload to cloudinary
+      const { path, public_id } = await upload(file, uploadFolder);
+      category.logo = {
+        path,
+        public_id,
+      };
+    }
+
     await category.save();
 
     res.status(201).json({

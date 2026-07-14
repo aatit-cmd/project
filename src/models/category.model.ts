@@ -1,14 +1,9 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose from "mongoose";
+import ImageSchema from "./image.model";
 
-//* Interface
-export interface ICategory extends Document {
-  name: string;
-  description?: string;
-  logo: string;
-}
 
 //* Category Schema
-const categorySchema = new Schema<ICategory>(
+const categorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -22,12 +17,12 @@ const categorySchema = new Schema<ICategory>(
     description: {
       type: String,
       trim: true,
-      minLength: 25,
+      minLength: 5,
       maxLength: 500,
     },
 
     logo: {
-      type: String,
+      type: ImageSchema,
       required: [true, "Logo is required"],
       trim: true,
     },
@@ -38,6 +33,6 @@ const categorySchema = new Schema<ICategory>(
 );
 
 //* Category Model
-const Category = mongoose.model<ICategory>("category", categorySchema);
+const Category = mongoose.model("category", categorySchema);
 
 export default Category;
