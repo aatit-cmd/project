@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   changeProfileImage,
+  getProfile,
   login,
   logout,
   register,
@@ -22,21 +23,18 @@ router.post("/register", upload.single("profile_image"), register);
 //* login
 router.post("/login", login);
 
-// router.post("/login",login);
-//* change profile image
-
 //* change profile image
 router.put(
-  "/profile-image",
+  "/change_profile_image",
   upload.single("profile_image"),
   authenticate(),
   changeProfileImage,
 );
 
 //* logout
-router.post("/logout", logout);
+router.post("/logout",authenticate(), logout);
 
 //* get profile
-// router.get("/profile", authenticate(), Profile);
+router.get("/profile", authenticate(), getProfile);
 
 export default router;

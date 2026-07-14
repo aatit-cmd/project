@@ -143,21 +143,20 @@ export const login = catchAsync(
   },
 );
 
+// logout
 export const logout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const access_token = req.cookies["access_token"];
-    const decoded_data = verifyJwtToken(access_token);
     res.clearCookie("access_token", {
       httpOnly: ENV_CONFIG.NODE_ENV === "development" ? false : true,
       secure: ENV_CONFIG.NODE_ENV === "development" ? false : true,
       maxAge: Date.now(),
       sameSite: ENV_CONFIG.NODE_ENV === "development" ? "lax" : "none",
     });
-    sendResponse(res , {
-      message : `${decoded_data.email} logged out successsfully`,
-      statuscode : 200,
-      data : decoded_data
-    })
+    sendResponse(res, {
+      message: `${req.user.email} logged out successsfully`,
+      statuscode: 200,
+      data: req.user,
+    });
   },
 );
 
@@ -209,9 +208,28 @@ export const getById = catchAsync(
   },
 );
 
-//* logout
-
 //* get profile
+export const getProfile = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user_id = req.user._id;
+    const user = await User.findById(user_id).select("-password");
+
+    if (!user) {
+      sendResponse(res, {
+        message: "user not found",
+        statuscode: 404,
+        data: null,
+      });
+      return;
+    }
+
+    sendResponse(res, {
+      message: "user  found",
+      statuscode: 200,
+      data: user,
+    });
+  },
+);
 
 //* change profile image
 export const changeProfileImage = catchAsync(
@@ -236,12 +254,13 @@ export const changeProfileImage = catchAsync(
       path,
       public_id,
     };
-
+    //  Database ma save garna ekdam jaroori chha!
+    await user.save();
     //* send success response
     sendResponse(res, {
       message: "Profile image updated",
       statuscode: 200,
-      data: user,
+      data: user.toObject(),
     });
   },
 );
