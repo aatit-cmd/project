@@ -5,7 +5,7 @@ import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { deleteFile, upload } from "../utils/cloudinary.utils";
 import { IJwtPayload } from "../types/gloabal.types";
-import { generateJwtToken } from "../utils/jwt.utils";
+import { generateJwtToken, verifyJwtToken } from "../utils/jwt.utils";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utils";
 import { sendEmail } from "../utils/emailServer.utils";
@@ -73,7 +73,7 @@ export const register = catchAsync(
       <p>Hi ${user.full_name}, welcome to our service</p>
     </div>`,
     });
-    
+
     //* success response
     res.status(201).json({
       message: "Account created",
@@ -140,6 +140,24 @@ export const login = catchAsync(
       statuscode: 201,
       data: { user: rest, access_token },
     });
+  },
+);
+
+export const logout = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const access_token = req.cookies["access_token"];
+    const decoded_data = verifyJwtToken(access_token);
+    res.clearCookie("access_token", {
+      httpOnly: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+      secure: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+      maxAge: Date.now(),
+      sameSite: ENV_CONFIG.NODE_ENV === "development" ? "lax" : "none",
+    });
+    sendResponse(res , {
+      message : `${decoded_data.email} logged out successsfully`,
+      statuscode : 200,
+      data : decoded_data
+    })
   },
 );
 

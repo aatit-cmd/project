@@ -3,6 +3,7 @@ import express from "express";
 import {
   changeProfileImage,
   login,
+  logout,
   register,
 } from "../controllers/auth.controller";
 
@@ -33,7 +34,7 @@ router.put(
 );
 
 //* logout
-// router.post("/logout", logout);
+router.post("/logout", logout);
 
 //* get profile
 // router.get("/profile", authenticate(), Profile);
