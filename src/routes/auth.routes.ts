@@ -10,6 +10,8 @@ import {
 
 import { uploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middlware";
+import { validate } from "../middlewares/validator.middleware";
+import { registerUserSchema } from "../validators/auth.validator";
 
 
 const router = express.Router();
@@ -18,7 +20,7 @@ const router = express.Router();
 const upload = uploader();
 
 //* register
-router.post("/register", upload.single("profile_image"), register);
+router.post("/register", upload.single("profile_image"),validate(registerUserSchema), register);
 
 //* login
 router.post("/login", login);
