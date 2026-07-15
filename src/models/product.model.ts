@@ -19,7 +19,7 @@ const productSchema = new moongoose.Schema(
       type: String,
       required: [true, "Product description is required"],
       trim: true,
-      minlength: [30, "Product description must be at least 30 characters"],
+      minlength: [5, "Product description must be at least 30 characters"],
       maxlength: [1000, "Product description must be at most 1000 characters"],
     },
     cover_image: {
