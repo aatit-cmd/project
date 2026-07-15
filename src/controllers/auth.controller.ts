@@ -9,6 +9,10 @@ import { generateJwtToken } from "../utils/jwt.utils";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utils";
 import { sendEmail } from "../utils/emailServer.utils";
+import {
+  accountCreatedHtml,
+  newLoginDetectedHtml,
+} from "../utils/emailTemplate.utils";
 
 const uploadFolder = "/profile_images";
 
@@ -20,30 +24,30 @@ export const register = catchAsync(
 
     const file = req.file;
 
-    if (!full_name) {
-      // const error :any = new Error("full_name is required");
-      // error.statusCode = 400;
-      // error.status = "fail";
-      // throw error;
+    // if (!full_name) {
+    //   // const error :any = new Error("full_name is required");
+    //   // error.statusCode = 400;
+    //   // error.status = "fail";
+    //   // throw error;
 
-      throw new appError("full_name is required", 400);
-    }
-    if (!email) {
-      // const error :any = new Error("email is required");
-      // error.statusCode = 400;
-      // error.status = "fail";
-      // throw error;
+    //   throw new appError("full_name is required", 400);
+    // }
+    // if (!email) {
+    //   // const error :any = new Error("email is required");
+    //   // error.statusCode = 400;
+    //   // error.status = "fail";
+    //   // throw error;
 
-      throw new appError("email is required", 400);
-    }
-    if (!password) {
-      // const error :any = new Error("password is required");
-      // error.statusCode = 400;
-      // error.status = "fail";
-      // throw error;
+    //   throw new appError("email is required", 400);
+    // }
+    // if (!password) {
+    //   // const error :any = new Error("password is required");
+    //   // error.statusCode = 400;
+    //   // error.status = "fail";
+    //   // throw error;
 
-      throw new appError("password is required", 400);
-    }
+    //   throw new appError("password is required", 400);
+    // }
 
     const user = new User({ email, password, full_name, phone });
 
@@ -68,10 +72,11 @@ export const register = catchAsync(
     sendEmail({
       to: user.email,
       subject: "Account created",
-      html: `<div>
-      <h2>Account created</h2>
-      <p>Hi ${user.full_name}, welcome to our service</p>
-    </div>`,
+      html: accountCreatedHtml({
+        full_name: user.full_name,
+        createdAt: user.createdAt,
+        email: user.email,
+      }),
     });
 
     //* success response
@@ -135,6 +140,18 @@ export const login = catchAsync(
     // });
 
     const { password: user_pass, ...rest } = user.toObject(); // remove password from response
+
+    sendEmail({
+      to: user.email,
+      subject: "New Login Detected",
+      html: newLoginDetectedHtml({
+        full_name: user.full_name,
+        loginTime: new Date(Date.now()),
+        email: user.email,
+        device: req.headers["user-agent"]!!,
+      }),
+    });
+
     sendResponse(res, {
       message: "Login sucess",
       statuscode: 201,

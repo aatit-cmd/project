@@ -4,6 +4,8 @@ export const ENV_CONFIG = {
   //* environment
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
+  APP_NAME : process.env.APP_NAME,
+  FRONT_END_URL : process.env.FRONT_END_URL,
 
   //* Database
   DB_URI: process.env.DB_URI!!,
