@@ -12,7 +12,7 @@ import {
 } from "../controllers/product.controller";
 import { uploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middlware";
-// import { All_Admin, User_Only } from "../types/enum.types";
+import { All_Admin, User_Only } from "../types/enum.types";
 
 const router = express.Router();
 
@@ -33,7 +33,7 @@ router.get("/:id", getById);
 // create
 router.post(
   "/",
-  authenticate(),
+  authenticate(All_Admin),
   upload.fields([
     { name: "cover_image", maxCount: 1 },
     { name: "images", maxCount: 5 },
@@ -44,7 +44,7 @@ router.post(
 // update
 router.put(
   "/:id",
-  authenticate(),
+  authenticate(All_Admin),
   upload.fields([
     { name: "cover_image", maxCount: 1 },
     { name: "images", maxCount: 5 },
