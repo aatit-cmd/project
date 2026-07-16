@@ -6,6 +6,7 @@ import Category from "../models/category.model";
 import appError from "../utils/appError.utils";
 import Brand from "../models/brand.model";
 import { deleteFile, upload } from "../utils/cloudinary.utils";
+import { de } from "zod/locales";
 
 const uploadFolder = "/product_cover";
 
@@ -102,86 +103,171 @@ export const create = catchAsync(
     sendResponse(res, {
       message: "product created",
       statuscode: 201,
-      data: product.toObject(),
+      data: product,
     });
   },
 );
 
 //* update
+// export const update = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const { id } = req.params;
+//     const existingProduct = await Product.findById(id);
+//     if (!existingProduct) {
+//       throw new appError("Invalid product id", 404);
+//     }
+//     const { price, description, category, brand, new_arrival, is_featured } =
+//       req.body;
+
+//     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+//     const newcoverImageFile = files?.["cover_image"]?.[0];
+
+//     if (newcoverImageFile) {
+//       if (existingProduct?.cover_image?.public_id) {
+//         await deleteFile(existingProduct.cover_image?.public_id);
+//       }
+//       const { path, public_id } = await upload(newcoverImageFile, uploadFolder);
+//       existingProduct.cover_image = { path, public_id };
+//     }
+
+//     const galleryImageFiles = files?.["images"] || [];
+
+//     if (galleryImageFiles.length > 0) {
+//       if (existingProduct.images && existingProduct.images.length > 0) {
+//         for (const img of existingProduct.images) {
+//           await deleteFile(img.public_id);
+//         }
+//         existingProduct.images = [] as any;
+//       }
+
+//       const uploadPromises = galleryImageFiles.map(async (imgFile) => {
+//         const { path, public_id } = await upload(imgFile, uploadFolder);
+//         return { path, public_id };
+//       });
+
+//       const uploadedImages = await Promise.all(uploadPromises);
+
+//       existingProduct.images.push(...uploadedImages);
+//     }
+//     if (price !== undefined) existingProduct.price = price;
+//     if (description !== undefined) existingProduct.description = description;
+//     if (category !== undefined) existingProduct.category = category;
+//     if (brand !== undefined) existingProduct.brand = brand;
+//     if (new_arrival !== undefined) existingProduct.new_arrival = new_arrival;
+//     if (is_featured !== undefined) existingProduct.is_featured = is_featured;
+
+//     await existingProduct.save();
+
+//     const populatedProduct = await existingProduct.populate([
+//       { path: "category", select: "name" },
+//       { path: "brand", select: "name" },
+//     ]);
+
+//     sendResponse(res, {
+//       message: "product updated successfully",
+//       statuscode: 201,
+//       data: populatedProduct.toObject(),
+//     });
+//   },
+// );
+
+// deleted_images = [public_id]
+// [5] = [3] + [2]
+
 export const update = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const existingProduct = await Product.findById(id);
-    if (!existingProduct) {
-      throw new appError("Invalid product id", 404);
-    }
-    const { price, description, category, brand, new_arrival, is_featured } =
-      req.body;
+    const existingProduct = await Product.findOne({ _id: id });
+    if (!existingProduct) throw new appError("Invalid product id", 404);
 
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    const newcoverImageFile = files?.["cover_image"]?.[0];
+    const {
+      price,
+      description,
+      category,
+      brand,
+      new_arrival,
+      is_featured,
+      deleted_images,
+    } = req.body;
 
-    if (newcoverImageFile) {
-      if (existingProduct?.cover_image?.public_id) {
-        await deleteFile(existingProduct.cover_image?.public_id);
-      }
-      const { path, public_id } = await upload(newcoverImageFile, uploadFolder);
+    if (price) existingProduct.price = price;
+    if (description) existingProduct.description = description;
+    if (category) existingProduct.category = category;
+    if (brand) existingProduct.brand = brand;
+    if (new_arrival) existingProduct.new_arrival = new_arrival;
+    if (is_featured) existingProduct.is_featured = is_featured;
+
+    const { cover_image, images } = req.files as {
+      cover_image: Express.Multer.File[];
+      images: Express.Multer.File[];
+    };
+
+    //* update cover image
+    if (cover_image && cover_image[0]) {
+      deleteFile(existingProduct.cover_image.public_id);
+      const { path, public_id } = await upload(cover_image[0], uploadFolder);
+
       existingProduct.cover_image = { path, public_id };
     }
 
-    const galleryImageFiles = files?.["images"] || [];
+    //* update images
+    if (
+      deleted_images &&
+      Array.isArray(deleted_images) &&
+      deleted_images.length > 0
+    ) {
+      // const promises = deleted_images.map(deleteFile);
 
-    if (galleryImageFiles.length > 0) {
-      if (existingProduct.images && existingProduct.images.length > 0) {
-        for (const img of existingProduct.images) {
-          await deleteFile(img.public_id);
-        }
-        existingProduct.images = [] as any;
-      }
+      // const files = await Promise.allSettled(promises);
 
-      const uploadPromises = galleryImageFiles.map(async (imgFile) => {
-        const { path, public_id } = await upload(imgFile, uploadFolder);
-        return { path, public_id };
-      });
+      Promise.allSettled(
+        deleted_images.map((public_id: string) => deleteFile(public_id)),
+      );
 
-      const uploadedImages = await Promise.all(uploadPromises);
-
-      existingProduct.images.push(...uploadedImages);
+      existingProduct.images = existingProduct.images.filter(
+        (img) => !deleted_images.includes(img.public_id).toString(),
+      ) as any;
     }
-    if (price !== undefined) existingProduct.price = price;
-    if (description !== undefined) existingProduct.description = description;
-    if (category !== undefined) existingProduct.category = category;
-    if (brand !== undefined) existingProduct.brand = brand;
-    if (new_arrival !== undefined) existingProduct.new_arrival = new_arrival;
-    if (is_featured !== undefined) existingProduct.is_featured = is_featured;
 
-    await existingProduct.save();
+    //* if new images
+    if (images && images.length > 0) {
+      const files = await Promise.allSettled(
+        images.map((file) => upload(file, uploadFolder)),
+      );
 
-    const populatedProduct = await existingProduct.populate([
-      { path: "category", select: "name" },
-      { path: "brand", select: "name" },
-    ]);
+      const newImages = files
+        .filter((promise) => promise.status === "fulfilled")
+        .map((img) => img.value);
 
-    sendResponse(res, {
-      message: "product updated successfully",
-      statuscode: 201,
-      data: populatedProduct.toObject(),
-    });
-  },
-);
+        existingProduct.set("images", [...existingProduct.images, ...newImages]);
+    }
+  })
 
 //* delete
 export const remove = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const deleteProduct = await Product.findByIdAndDelete(id);
+    const product = await Product.findOne({ _id: id });
 
-    if (!deleteProduct) {
+    if (!product) {
       throw new appError("id not found to delete", 404);
     }
 
+    //* delete cover image
+    deleteFile(product.cover_image.public_id);
+
+    //* delete images
+    if (product.images && product.images.length > 0) {
+      Promise.allSettled(
+        product.images.map((img) => deleteFile(img.public_id)),
+      );
+    }
+
+    //* delete product
+    await Product.deleteOne({ _id: id });
+
     sendResponse(res, {
-      message: "product deleted successfully",
+      message: `product: ${id}  deleted successfully`,
       statuscode: 200,
       data: null,
     });
