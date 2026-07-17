@@ -4,18 +4,63 @@ import Brand from "../models/brand.model";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { upload } from "../utils/cloudinary.utils";
+import { sendResponse } from "../utils/sendResponse.utils";
+import { getPagenation } from "../utils/pagenation.utils";
 
-const uploadFolder = "/brand_logo"
+const uploadFolder = "/brand_logo";
 // getAll
 export const getAll = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const brands = await Brand.find();
+    const {
+      query,
+      order = "DESC",
+      sortBy = "createdAt",
+      page = 1,
+      limit = 10,
+    } = req.query;
 
-    res.status(200).json({
-      message: "all the brands fetched",
-      status: "success",
-      success: true,
-      data: brands,
+    const currentPage = Number(page);
+    const perPage = Number(limit);
+    const skip = (currentPage - 1) * perPage;
+
+    const filter: Record<string, any> = {};
+    if (query) {
+      filter.$or = [
+        {
+          name: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+        {
+          description: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    const brands = await Brand.find(filter)
+      .limit(perPage)
+      .skip(skip)
+      .sort({
+        [sortBy as string]: order === "DESC" ? -1 : 1,
+      });
+
+    const totalCount = await Brand.countDocuments(filter);
+    // 21, limit 10 -> 2.1 ->3
+
+    sendResponse(res, {
+      message: "Brands fetched",
+      data: {
+        brands,
+        pagination: {
+          brands,
+          pagination: getPagenation(totalCount, perPage, currentPage),
+        },
+      },
+      statuscode: 200,
     });
   },
 );
@@ -31,11 +76,17 @@ export const getById = catchAsync(
       return new appError("Brand  not found", 404);
     }
 
-    res.status(200).json({
+    // res.status(200).json({
+    //   message: "brand fetched",
+    //   status: "success",
+    //   success: true,
+    //   data: brand,
+    // });
+
+    sendResponse(res, {
       message: "brand fetched",
-      status: "success",
-      success: true,
       data: brand,
+      statuscode: 200,
     });
   },
 );
@@ -67,7 +118,7 @@ export const create = catchAsync(
       };
     }
 
-     await brand.save()
+    await brand.save();
 
     res.status(201).json({
       message: "brand created",

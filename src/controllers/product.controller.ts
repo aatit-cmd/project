@@ -6,14 +6,64 @@ import Category from "../models/category.model";
 import appError from "../utils/appError.utils";
 import Brand from "../models/brand.model";
 import { deleteFile, upload } from "../utils/cloudinary.utils";
-import { de } from "zod/locales";
+// import { de } from "zod/locales";
 
 const uploadFolder = "/product_cover";
 
 //* get all
 export const getAll = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const products = await Product.find();
+    const { query, category, brand, minPrice, maxPrice } = req.query;
+    const filter: any = {};
+
+    if (query) {
+      filter.$or = [
+        {
+          name: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+        {
+          description: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    //* category
+    if (category) {
+      filter.category = category;
+    }
+
+    //* brand
+    if (brand) {
+      filter.brand = brand;
+    }
+
+    //* price range
+    if (minPrice || maxPrice) {
+      const low = Number(minPrice);
+      const high = Number(maxPrice);
+
+      if (low) {
+        filter.price = { $gte: low };
+      }
+      if (high) {
+        filter.price = { $lte: high };
+      }
+
+      if (low && high) {
+        filter.price = { $gte: low, $lte: high };
+      }
+    }
+
+    console.log(filter);
+
+    const products = await Product.find(filter);
+    console.log(products);
     sendResponse(res, {
       message: "All product fetched",
       statuscode: 200,
@@ -239,9 +289,10 @@ export const update = catchAsync(
         .filter((promise) => promise.status === "fulfilled")
         .map((img) => img.value);
 
-        existingProduct.set("images", [...existingProduct.images, ...newImages]);
+      existingProduct.set("images", [...existingProduct.images, ...newImages]);
     }
-  })
+  },
+);
 
 //* delete
 export const remove = catchAsync(
