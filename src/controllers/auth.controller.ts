@@ -178,12 +178,8 @@ export const logout = catchAsync(
 );
 
 // get all
-export const getAll = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
+export const getAll = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const users = await User.find();
 
     // res.status(200).json({
@@ -198,10 +194,8 @@ export const getAll = async (
       statuscode: 200,
       data: users,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+  },
+);
 
 // get byid
 export const getById = catchAsync(

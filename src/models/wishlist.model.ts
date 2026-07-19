@@ -3,7 +3,6 @@
 // {user:user_id, items[{product:product_id, quantity:number}]}
 
 import mongoose from "mongoose";
-import { minLength } from "zod";
 
 const wishlistSchema = new mongoose.Schema(
   {

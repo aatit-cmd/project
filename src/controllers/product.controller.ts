@@ -60,7 +60,7 @@ export const getAll = catchAsync(
       }
     }
 
-    console.log(filter);
+   
 
     const products = await Product.find(filter);
     console.log(products);
@@ -158,68 +158,6 @@ export const create = catchAsync(
   },
 );
 
-//* update
-// export const update = catchAsync(
-//   async (req: Request, res: Response, next: NextFunction) => {
-//     const { id } = req.params;
-//     const existingProduct = await Product.findById(id);
-//     if (!existingProduct) {
-//       throw new appError("Invalid product id", 404);
-//     }
-//     const { price, description, category, brand, new_arrival, is_featured } =
-//       req.body;
-
-//     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-//     const newcoverImageFile = files?.["cover_image"]?.[0];
-
-//     if (newcoverImageFile) {
-//       if (existingProduct?.cover_image?.public_id) {
-//         await deleteFile(existingProduct.cover_image?.public_id);
-//       }
-//       const { path, public_id } = await upload(newcoverImageFile, uploadFolder);
-//       existingProduct.cover_image = { path, public_id };
-//     }
-
-//     const galleryImageFiles = files?.["images"] || [];
-
-//     if (galleryImageFiles.length > 0) {
-//       if (existingProduct.images && existingProduct.images.length > 0) {
-//         for (const img of existingProduct.images) {
-//           await deleteFile(img.public_id);
-//         }
-//         existingProduct.images = [] as any;
-//       }
-
-//       const uploadPromises = galleryImageFiles.map(async (imgFile) => {
-//         const { path, public_id } = await upload(imgFile, uploadFolder);
-//         return { path, public_id };
-//       });
-
-//       const uploadedImages = await Promise.all(uploadPromises);
-
-//       existingProduct.images.push(...uploadedImages);
-//     }
-//     if (price !== undefined) existingProduct.price = price;
-//     if (description !== undefined) existingProduct.description = description;
-//     if (category !== undefined) existingProduct.category = category;
-//     if (brand !== undefined) existingProduct.brand = brand;
-//     if (new_arrival !== undefined) existingProduct.new_arrival = new_arrival;
-//     if (is_featured !== undefined) existingProduct.is_featured = is_featured;
-
-//     await existingProduct.save();
-
-//     const populatedProduct = await existingProduct.populate([
-//       { path: "category", select: "name" },
-//       { path: "brand", select: "name" },
-//     ]);
-
-//     sendResponse(res, {
-//       message: "product updated successfully",
-//       statuscode: 201,
-//       data: populatedProduct.toObject(),
-//     });
-//   },
-// );
 
 // deleted_images = [public_id]
 // [5] = [3] + [2]
