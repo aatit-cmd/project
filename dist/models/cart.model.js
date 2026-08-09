@@ -23,8 +23,16 @@ const cartSchema = new mongoose_1.default.Schema({
                 minLength: [1, "quantity cannot be less than 1"],
                 default: 1,
             },
+            subTotal: {
+                type: Number,
+                default: 0,
+            },
         },
     ],
+    totalPrice: {
+        type: Number,
+        default: 0,
+    },
 }, { timestamps: true });
 const cart = mongoose_1.default.model("cart", cartSchema);
 exports.default = cart;

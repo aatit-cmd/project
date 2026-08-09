@@ -28,6 +28,7 @@ process.on("unhandledRejection", (error) => {
     console.log("Unhandled Rejection:", error);
     process.exit(1);
 });
+// development ctrl + c
 process.on("SIGINT", () => {
     console.log("SIGINT");
     server.close(async (error) => {
@@ -37,6 +38,7 @@ process.on("SIGINT", () => {
     });
     process.exit(0);
 });
+// production (pm2 , docker)
 process.on("SIGTERM", (error) => {
     console.log("SIGTERM");
     server.close(async (error) => {

@@ -1,7 +1,7 @@
 class appError extends Error {
   status: "error" | "fail";
 
-  isOperation: Boolean;
+  isOperation: boolean;
   constructor(
     public message: string,
     public statusCode: number,

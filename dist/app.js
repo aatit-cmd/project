@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const errorHandler_middleware_1 = require("./middlewares/errorHandler.middleware");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-// @types/packageName 
+const cors_1 = __importDefault(require("cors"));
+// @types/packageName
 // this is dev dependency package which is used to provide type definitions for the express package. It allows TypeScript to understand the types and interfaces of the express library, enabling better type checking and autocompletion in your code editor.
 const routes_1 = __importDefault(require("./routes"));
 //* creating app instance
@@ -14,6 +15,7 @@ const app = (0, express_1.default)();
 //! using middlewares
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use((0, cookie_parser_1.default)());
+app.use((0, cors_1.default)({ origin: "*" }));
 //* health route
 app.get("/", (req, res, next) => {
     res.status(200).json({

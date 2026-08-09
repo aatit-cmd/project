@@ -20,8 +20,16 @@ const cartSchema = new mongoose.Schema(
           minLength: [1, "quantity cannot be less than 1"],
           default: 1,
         },
+        subTotal: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
+    totalPrice: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
 );
