@@ -60,9 +60,11 @@ export const getAll = catchAsync(
       }
     }
 
-   
+    const products = await Product.find(filter).populate([
+      { path: "category", select: "name" },
+      { path: "brand", select: "name" },
+    ]);
 
-    const products = await Product.find(filter);
     console.log(products);
     sendResponse(res, {
       message: "All product fetched",
@@ -157,7 +159,6 @@ export const create = catchAsync(
     });
   },
 );
-
 
 // deleted_images = [public_id]
 // [5] = [3] + [2]
